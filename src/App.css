@@ -75,15 +75,16 @@ main {
   flex-direction: column;
   align-items: center;
   flex: 1;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 0.25rem;
+  padding-bottom: 0.5rem;
 }
 
 /* === Circular Timer Area === */
 .timer-area {
   position: relative;
-  width: min(45vw, 30vh, 200px);
-  height: min(45vw, 30vh, 200px);
+  width: min(45vw, 200px);
+  height: min(45vw, 200px);
   flex-shrink: 0;
 }
 
@@ -308,8 +309,8 @@ main {
 
 .game-over-circle {
   position: relative;
-  width: min(45vw, 30vh, 200px);
-  height: min(45vw, 30vh, 200px);
+  width: min(45vw, 200px);
+  height: min(45vw, 200px);
   margin: 0.3rem 0;
 }
 
