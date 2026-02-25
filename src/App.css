@@ -378,6 +378,10 @@ main {
   font-size: 0.75rem;
 }
 
+.ranking-empty {
+  opacity: 0.3;
+}
+
 .ranking-compact {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;

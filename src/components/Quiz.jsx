@@ -193,22 +193,23 @@ export default function Quiz() {
     return (
       <div className="quiz-container">
         <div className="start-screen">
-          {ranking.length > 0 && (
-            <div className="ranking">
-              <h3 className="ranking-title">RANKING</h3>
-              <ol className="ranking-list">
-                {ranking.map((entry, i) => (
-                  <li key={i} className="ranking-item">
+          <div className="ranking">
+            <h3 className="ranking-title">RANKING</h3>
+            <ol className="ranking-list">
+              {Array.from({ length: RANKING_MAX }, (_, i) => {
+                const entry = ranking[i];
+                return (
+                  <li key={i} className={`ranking-item ${!entry ? 'ranking-empty' : ''}`}>
                     <span className="ranking-pos">{i + 1}</span>
-                    <span className="ranking-score">{entry.score}問正解</span>
+                    <span className="ranking-score">{entry ? `${entry.score}問正解` : '---'}</span>
                     <span className="ranking-date">
-                      {new Date(entry.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                      {entry ? new Date(entry.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }) : ''}
                     </span>
                   </li>
-                ))}
-              </ol>
-            </div>
-          )}
+                );
+              })}
+            </ol>
+          </div>
           <div className="start-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
               <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
@@ -240,19 +241,20 @@ export default function Quiz() {
     return (
       <div className="quiz-container">
         <div className="game-over">
-          {ranking.length > 0 && (
-            <div className="ranking ranking-compact">
-              <h3 className="ranking-title">RANKING</h3>
-              <ol className="ranking-list">
-                {ranking.map((entry, i) => (
-                  <li key={i} className="ranking-item">
+          <div className="ranking ranking-compact">
+            <h3 className="ranking-title">RANKING</h3>
+            <ol className="ranking-list">
+              {Array.from({ length: RANKING_MAX }, (_, i) => {
+                const entry = ranking[i];
+                return (
+                  <li key={i} className={`ranking-item ${!entry ? 'ranking-empty' : ''}`}>
                     <span className="ranking-pos">{i + 1}</span>
-                    <span className="ranking-score">{entry.score}問正解</span>
+                    <span className="ranking-score">{entry ? `${entry.score}問正解` : '---'}</span>
                   </li>
-                ))}
-              </ol>
-            </div>
-          )}
+                );
+              })}
+            </ol>
+          </div>
           <div className="game-over-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
               <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
