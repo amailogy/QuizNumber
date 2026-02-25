@@ -260,6 +260,35 @@
   background: rgba(108, 92, 231, 0.1);
 }
 
+/* === Start Screen === */
+.start-screen {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.start-circle {
+  position: relative;
+  width: min(55vw, 220px);
+  height: min(55vw, 220px);
+}
+
+.start-desc {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.btn-start {
+  width: 200px;
+  padding: 1rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.2em;
+}
+
 /* === Game Over === */
 .game-over {
   text-align: center;

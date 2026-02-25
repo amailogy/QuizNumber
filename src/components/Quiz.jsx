@@ -9,6 +9,7 @@ const CIRCLE_RADIUS = 140;
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
 
 export default function Quiz() {
+  const [started, setStarted] = useState(false);
   const [questionNumber, setQuestionNumber] = useState(1);
   const [answerHistory, setAnswerHistory] = useState([]);
   const [question, setQuestion] = useState(null);
@@ -34,7 +35,7 @@ export default function Quiz() {
       if (remaining <= 0) {
         clearInterval(timerRef.current);
       }
-    }, 50); // 50msごとに更新（滑らかなアニメーション用）
+    }, 50);
   }, []);
 
   // タイマー停止
@@ -44,36 +45,44 @@ export default function Quiz() {
 
   // 問題生成 & タイマー開始
   useEffect(() => {
-    if (!gameOver && !result) {
+    if (started && !gameOver && !result) {
       const q = generateQuestion(questionNumber, answerHistory);
       setQuestion(q);
       startTimer();
     }
     return () => stopTimer();
-  }, [questionNumber, gameOver, result]);
+  }, [questionNumber, gameOver, result, started]);
 
   // タイムアウト検知
   useEffect(() => {
-    if (timeLeft <= 0 && !result && !gameOver) {
+    if (timeLeft <= 0 && !result && !gameOver && started) {
       handleTimeOut();
     }
-  }, [timeLeft, result, gameOver]);
+  }, [timeLeft, result, gameOver, started]);
 
   // 入力欄に常にフォーカス（モバイルでキーボードを維持）
   useEffect(() => {
-    if (!gameOver && !result && inputRef.current) {
+    if (started && !gameOver && !result && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [questionNumber, gameOver, result]);
+  }, [questionNumber, gameOver, result, started]);
 
   const handleBlur = useCallback(() => {
-    // キーボードが閉じないよう即座に再フォーカス
-    if (!gameOver && !result) {
+    if (started && !gameOver && !result) {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 10);
     }
-  }, [gameOver, result]);
+  }, [started, gameOver, result]);
+
+  // スタートボタン: ユーザータップでinputにフォーカス → キーボード表示
+  const handleStart = () => {
+    setStarted(true);
+    // 次のレンダーでinputが表示されるので、少し待ってフォーカス
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+  };
 
   const handleGameEnd = useCallback(() => {
     const finalScore = questionNumber - 1;
@@ -123,6 +132,7 @@ export default function Quiz() {
     setResult(null);
     setQuestion(null);
     setTimeLeft(TIME_LIMIT);
+    setStarted(false);
   };
 
   const handleShare = () => {
@@ -140,7 +150,7 @@ export default function Quiz() {
   const progress = timeLeft / TIME_LIMIT;
   const strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - progress);
 
-  // タイマー色（残り少なくなると赤）
+  // タイマー色
   const getTimerColor = () => {
     if (result === 'correct') return 'var(--correct)';
     if (result === 'wrong' || result === 'timeout') return 'var(--wrong)';
@@ -149,7 +159,40 @@ export default function Quiz() {
     return 'var(--primary)';
   };
 
-  // ゲームオーバー画面
+  // === スタート画面 ===
+  if (!started) {
+    return (
+      <div className="quiz-container">
+        <div className="start-screen">
+          <div className="start-circle">
+            <svg viewBox="0 0 320 320" className="timer-svg">
+              <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
+              <circle
+                cx="160" cy="160" r={CIRCLE_RADIUS}
+                className="timer-progress"
+                style={{
+                  strokeDasharray: CIRCLE_CIRCUMFERENCE,
+                  strokeDashoffset: 0,
+                  stroke: 'var(--primary)',
+                }}
+              />
+            </svg>
+            <div className="timer-content">
+              <p className="start-desc">今、何問目か<br />覚えてられる？</p>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-start" onClick={handleStart}>
+            START
+          </button>
+          {bestScore > 0 && (
+            <p className="best-score">ベスト記録: {bestScore}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // === ゲームオーバー画面 ===
   if (gameOver) {
     const score = questionNumber - 1;
     return (
@@ -157,10 +200,7 @@ export default function Quiz() {
         <div className="game-over">
           <div className="game-over-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
-              <circle
-                cx="160" cy="160" r={CIRCLE_RADIUS}
-                className="timer-track"
-              />
+              <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
             </svg>
             <div className="game-over-inner">
               <span className="game-over-label">GAME OVER</span>
@@ -187,17 +227,12 @@ export default function Quiz() {
     );
   }
 
+  // === プレイ画面 ===
   return (
     <div className="quiz-container">
-      {/* 円形タイマー + 問題 */}
       <div className={`timer-area ${result === 'wrong' || result === 'timeout' ? 'shake' : ''}`}>
         <svg viewBox="0 0 320 320" className="timer-svg">
-          {/* 背景のトラック */}
-          <circle
-            cx="160" cy="160" r={CIRCLE_RADIUS}
-            className="timer-track"
-          />
-          {/* カウントダウンのリング */}
+          <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
           <circle
             cx="160" cy="160" r={CIRCLE_RADIUS}
             className="timer-progress"
@@ -210,12 +245,10 @@ export default function Quiz() {
           />
         </svg>
 
-        {/* 中央のコンテンツ */}
         <div className="timer-content">
           <h2 className="question-text">{question?.text}</h2>
         </div>
 
-        {/* 正解/不正解オーバーレイ */}
         {result === 'correct' && (
           <div className="result-overlay correct">
             <span className="result-icon">&#10003;</span>
@@ -233,10 +266,8 @@ export default function Quiz() {
         )}
       </div>
 
-      {/* 正解数 */}
       <div className="streak">正解数: {questionNumber - 1}</div>
 
-      {/* 回答フォーム */}
       <form className="answer-form" onSubmit={handleSubmit}>
         <input
           ref={inputRef}
