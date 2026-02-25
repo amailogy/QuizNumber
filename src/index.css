@@ -4,13 +4,27 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
   background: #0f0f1a;
   color: #f0f0f0;
-  height: 100dvh;
+  height: 100%;
   min-width: 320px;
   overflow: hidden;
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
 }

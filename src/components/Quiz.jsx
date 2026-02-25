@@ -62,23 +62,34 @@ export default function Quiz() {
 
   // 入力欄に常にフォーカス（モバイルでキーボードを維持）
   useEffect(() => {
-    if (started && !gameOver && !result && inputRef.current) {
+    if (started && !gameOver && inputRef.current) {
       inputRef.current.focus();
     }
   }, [questionNumber, gameOver, result, started]);
 
+  // フォーカスを強制的に維持（キーボードが消えないように）
   const handleBlur = useCallback(() => {
-    if (started && !gameOver && !result) {
-      setTimeout(() => {
+    if (started && !gameOver) {
+      requestAnimationFrame(() => {
         inputRef.current?.focus();
-      }, 10);
+      });
     }
-  }, [started, gameOver, result]);
+  }, [started, gameOver]);
 
-  // スタートボタン: ユーザータップでinputにフォーカス → キーボード表示
+  // iOSでスクロールさせない
+  useEffect(() => {
+    const prevent = (e) => {
+      if (started && !gameOver) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('touchmove', prevent, { passive: false });
+    return () => document.removeEventListener('touchmove', prevent);
+  }, [started, gameOver]);
+
+  // スタートボタン
   const handleStart = () => {
     setStarted(true);
-    // 次のレンダーでinputが表示されるので、少し待ってフォーカス
     setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -276,10 +287,11 @@ export default function Quiz() {
           enterKeyHint="go"
           className="answer-input"
           value={userAnswer}
-          onChange={(e) => setUserAnswer(e.target.value)}
+          onChange={(e) => {
+            if (!result) setUserAnswer(e.target.value);
+          }}
           onBlur={handleBlur}
           placeholder="?"
-          readOnly={!!result}
           autoComplete="off"
         />
         <button
