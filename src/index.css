@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: #0f0f1a;
+  color: #f0f0f0;
+  min-height: 100dvh;
+  min-width: 320px;
+}
