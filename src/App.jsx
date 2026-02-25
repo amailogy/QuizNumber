@@ -18,7 +18,6 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">何問目クイズ</h1>
-        <p className="app-subtitle">今、何問目か覚えてる？</p>
       </header>
       <main>
         <Quiz />
