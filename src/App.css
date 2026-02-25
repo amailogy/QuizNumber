@@ -46,6 +46,33 @@
   color: var(--text-muted);
   font-size: 0.65rem;
   flex-shrink: 0;
+  text-align: center;
+}
+
+.footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.footer-nav button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.footer-nav button:hover {
+  color: var(--primary);
+}
+
+.footer-sep {
+  color: var(--text-muted);
+  opacity: 0.4;
 }
 
 @media (max-height: 600px) {
@@ -426,6 +453,84 @@ main {
 .game-over-buttons {
   display: flex;
   gap: 0.75rem;
+}
+
+/* === Static Pages === */
+.page {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.page-back {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  margin-bottom: 0.5rem;
+}
+
+.page-back:hover {
+  text-decoration: underline;
+}
+
+.page-title {
+  font-size: 1.3rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.page-body h3 {
+  font-size: 1rem;
+  color: var(--primary);
+  margin: 1.2rem 0 0.4rem;
+}
+
+.page-body p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+
+.page-body ul {
+  padding-left: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-body li {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 0.3rem;
+}
+
+.page-body a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.page-date {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+}
+
+.contact-email {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.contact-email a {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary);
 }
 
 /* === Responsive === */
