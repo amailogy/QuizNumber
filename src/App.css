@@ -58,6 +58,14 @@
   }
 }
 
+main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
 /* === Quiz Container === */
 .quiz-container {
   width: 100%;

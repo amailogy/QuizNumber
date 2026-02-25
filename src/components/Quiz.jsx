@@ -178,7 +178,7 @@ export default function Quiz() {
               />
             </svg>
             <div className="timer-content">
-              <p className="start-desc">今、何問目か<br />覚えてられる？</p>
+              <p className="start-desc">今、何問目？</p>
             </div>
           </div>
           <button className="btn btn-primary btn-start" onClick={handleStart}>
@@ -279,7 +279,7 @@ export default function Quiz() {
           onChange={(e) => setUserAnswer(e.target.value)}
           onBlur={handleBlur}
           placeholder="?"
-          disabled={!!result}
+          readOnly={!!result}
           autoComplete="off"
         />
         <button
