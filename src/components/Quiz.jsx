@@ -193,6 +193,22 @@ export default function Quiz() {
     return (
       <div className="quiz-container">
         <div className="start-screen">
+          {ranking.length > 0 && (
+            <div className="ranking">
+              <h3 className="ranking-title">RANKING</h3>
+              <ol className="ranking-list">
+                {ranking.map((entry, i) => (
+                  <li key={i} className="ranking-item">
+                    <span className="ranking-pos">{i + 1}</span>
+                    <span className="ranking-score">{entry.score}問正解</span>
+                    <span className="ranking-date">
+                      {new Date(entry.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
           <div className="start-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
               <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
@@ -213,22 +229,6 @@ export default function Quiz() {
           <button className="btn btn-primary btn-start" onClick={handleStart}>
             START
           </button>
-          {ranking.length > 0 && (
-            <div className="ranking">
-              <h3 className="ranking-title">RANKING</h3>
-              <ol className="ranking-list">
-                {ranking.map((entry, i) => (
-                  <li key={i} className="ranking-item">
-                    <span className="ranking-pos">{i + 1}</span>
-                    <span className="ranking-score">{entry.score}問正解</span>
-                    <span className="ranking-date">
-                      {new Date(entry.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -240,6 +240,19 @@ export default function Quiz() {
     return (
       <div className="quiz-container">
         <div className="game-over">
+          {ranking.length > 0 && (
+            <div className="ranking ranking-compact">
+              <h3 className="ranking-title">RANKING</h3>
+              <ol className="ranking-list">
+                {ranking.map((entry, i) => (
+                  <li key={i} className="ranking-item">
+                    <span className="ranking-pos">{i + 1}</span>
+                    <span className="ranking-score">{entry.score}問正解</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
           <div className="game-over-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
               <circle cx="160" cy="160" r={CIRCLE_RADIUS} className="timer-track" />
@@ -254,19 +267,6 @@ export default function Quiz() {
             <p className="correct-answer">
               正解は <strong>{question.answer}</strong> でした
             </p>
-          )}
-          {ranking.length > 0 && (
-            <div className="ranking ranking-compact">
-              <h3 className="ranking-title">RANKING</h3>
-              <ol className="ranking-list">
-                {ranking.map((entry, i) => (
-                  <li key={i} className={`ranking-item ${entry.date === ranking.find(r => r.score === score && r.date >= Date.now() - 3000)?.date ? 'ranking-new' : ''}`}>
-                    <span className="ranking-pos">{i + 1}</span>
-                    <span className="ranking-score">{entry.score}問正解</span>
-                  </li>
-                ))}
-              </ol>
-            </div>
           )}
           <div className="game-over-buttons">
             <button className="btn btn-primary" onClick={handleRetry}>
