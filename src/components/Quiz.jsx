@@ -3,6 +3,26 @@ import { generateQuestion } from '../utils/questionGenerator';
 
 const RESULT_DISPLAY_MS = 1000;
 const TIME_LIMIT = 10; // 秒
+const RANKING_KEY = 'quizNumberRanking';
+const RANKING_MAX = 5;
+
+function loadRanking() {
+  try {
+    return JSON.parse(localStorage.getItem(RANKING_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveScore(score) {
+  if (score <= 0) return loadRanking();
+  const ranking = loadRanking();
+  ranking.push({ score, date: Date.now() });
+  ranking.sort((a, b) => b.score - a.score);
+  const trimmed = ranking.slice(0, RANKING_MAX);
+  localStorage.setItem(RANKING_KEY, JSON.stringify(trimmed));
+  return trimmed;
+}
 
 // SVG円形タイマーの設定
 const CIRCLE_RADIUS = 140;
@@ -16,9 +36,7 @@ export default function Quiz() {
   const [userAnswer, setUserAnswer] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [result, setResult] = useState(null); // 'correct' | 'wrong' | 'timeout' | null
-  const [bestScore, setBestScore] = useState(() => {
-    return parseInt(localStorage.getItem('quizNumberBest') || '0', 10);
-  });
+  const [ranking, setRanking] = useState(() => loadRanking());
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const timerRef = useRef(null);
   const inputRef = useRef(null);
@@ -97,14 +115,12 @@ export default function Quiz() {
 
   const handleGameEnd = useCallback(() => {
     const finalScore = questionNumber - 1;
-    if (finalScore > bestScore) {
-      setBestScore(finalScore);
-      localStorage.setItem('quizNumberBest', String(finalScore));
-    }
+    const updated = saveScore(finalScore);
+    setRanking(updated);
     setTimeout(() => {
       setGameOver(true);
     }, RESULT_DISPLAY_MS);
-  }, [questionNumber, bestScore]);
+  }, [questionNumber]);
 
   const handleTimeOut = useCallback(() => {
     stopTimer();
@@ -144,11 +160,13 @@ export default function Quiz() {
     setQuestion(null);
     setTimeLeft(TIME_LIMIT);
     setStarted(false);
+    setRanking(loadRanking());
   };
 
   const handleShare = () => {
     const score = questionNumber - 1;
-    const text = `【何問目クイズ】${score}問正解しました！\nあなたはどこまでいける？\n${window.location.href}`;
+    const best = ranking.length > 0 ? ranking[0].score : score;
+    const text = `【何問目クイズ】${score}問正解！（ベスト: ${best}）\nあなたはどこまでいける？\n${window.location.href}`;
     if (navigator.share) {
       navigator.share({ text });
     } else {
@@ -195,8 +213,21 @@ export default function Quiz() {
           <button className="btn btn-primary btn-start" onClick={handleStart}>
             START
           </button>
-          {bestScore > 0 && (
-            <p className="best-score">ベスト記録: {bestScore}</p>
+          {ranking.length > 0 && (
+            <div className="ranking">
+              <h3 className="ranking-title">RANKING</h3>
+              <ol className="ranking-list">
+                {ranking.map((entry, i) => (
+                  <li key={i} className="ranking-item">
+                    <span className="ranking-pos">{i + 1}</span>
+                    <span className="ranking-score">{entry.score}問正解</span>
+                    <span className="ranking-date">
+                      {new Date(entry.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
         </div>
       </div>
@@ -224,7 +255,19 @@ export default function Quiz() {
               正解は <strong>{question.answer}</strong> でした
             </p>
           )}
-          <p className="best-score">ベスト記録: {bestScore}</p>
+          {ranking.length > 0 && (
+            <div className="ranking ranking-compact">
+              <h3 className="ranking-title">RANKING</h3>
+              <ol className="ranking-list">
+                {ranking.map((entry, i) => (
+                  <li key={i} className={`ranking-item ${entry.date === ranking.find(r => r.score === score && r.date >= Date.now() - 3000)?.date ? 'ranking-new' : ''}`}>
+                    <span className="ranking-pos">{i + 1}</span>
+                    <span className="ranking-score">{entry.score}問正解</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
           <div className="game-over-buttons">
             <button className="btn btn-primary" onClick={handleRetry}>
               もう一度
