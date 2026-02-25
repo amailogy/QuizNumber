@@ -59,12 +59,21 @@ export default function Quiz() {
     }
   }, [timeLeft, result, gameOver]);
 
-  // 入力欄にフォーカス
+  // 入力欄に常にフォーカス（モバイルでキーボードを維持）
   useEffect(() => {
     if (!gameOver && !result && inputRef.current) {
       inputRef.current.focus();
     }
   }, [questionNumber, gameOver, result]);
+
+  const handleBlur = useCallback(() => {
+    // キーボードが閉じないよう即座に再フォーカス
+    if (!gameOver && !result) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    }
+  }, [gameOver, result]);
 
   const handleGameEnd = useCallback(() => {
     const finalScore = questionNumber - 1;
@@ -233,9 +242,11 @@ export default function Quiz() {
           ref={inputRef}
           type="number"
           inputMode="numeric"
+          enterKeyHint="go"
           className="answer-input"
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
+          onBlur={handleBlur}
           placeholder="?"
           disabled={!!result}
           autoComplete="off"
