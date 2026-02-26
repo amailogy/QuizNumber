@@ -165,8 +165,7 @@ export default function Quiz() {
 
   const handleShare = () => {
     const score = questionNumber - 1;
-    const best = ranking.length > 0 ? ranking[0].score : score;
-    const text = `🧠 今、${score + 1}問目！…ここで終了〜😇\n\n✅ ${score}問正解 ｜ 🏆 ベスト ${best}問\n\n何問目か覚えていられる？挑戦してみて👇\n${window.location.href}`;
+    const text = `今、${score + 1}問目！\n挑戦者求ム👇\nhttps://nanmonme.com/`;
     if (navigator.share) {
       navigator.share({ text });
     } else {
@@ -275,7 +274,7 @@ export default function Quiz() {
               もう一度
             </button>
             <button className="btn btn-share" onClick={handleShare}>
-              結果をシェア
+              シェア
             </button>
           </div>
         </div>
