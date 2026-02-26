@@ -322,8 +322,6 @@ export default function Quiz() {
         )}
       </div>
 
-      <div className="streak">正解数: {questionNumber - 1}</div>
-
       <form className="answer-form" onSubmit={handleSubmit}>
         <input
           ref={inputRef}
