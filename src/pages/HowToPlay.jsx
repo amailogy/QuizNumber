@@ -4,7 +4,7 @@ export default function HowToPlay({ onBack }) {
       <button className="page-back" onClick={onBack}>&larr; 戻る</button>
       <h2 className="page-title">遊び方</h2>
       <div className="page-body">
-        <h3>何問目クイズとは？</h3>
+        <h3>「今、何問目？」とは？</h3>
         <p>「今、何問目を解いているか？」を覚えながら進める記憶力クイズです。問題に答えながら、自分が今何問目にいるのかを常に把握しておく必要があります。</p>
 
         <h3>ルール</h3>

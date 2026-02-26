@@ -4,7 +4,7 @@ export default function PrivacyPolicy({ onBack }) {
       <button className="page-back" onClick={onBack}>&larr; 戻る</button>
       <h2 className="page-title">プライバシーポリシー</h2>
       <div className="page-body">
-        <p>「何問目クイズ」（以下「本サービス」）は、以下のとおりプライバシーポリシーを定めます。</p>
+        <p>「今、何問目？」（以下「本サービス」）は、以下のとおりプライバシーポリシーを定めます。</p>
 
         <h3>1. 取得する情報</h3>
         <p>本サービスはユーザー登録を必要としません。ゲームのランキングデータはお使いのブラウザの localStorage に保存され、サーバーへ送信されることはありません。</p>

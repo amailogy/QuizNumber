@@ -4,7 +4,7 @@ export default function Contact({ onBack }) {
       <button className="page-back" onClick={onBack}>&larr; 戻る</button>
       <h2 className="page-title">お問い合わせ</h2>
       <div className="page-body">
-        <p>「何問目クイズ」に関するお問い合わせは、以下のメールアドレスまでご連絡ください。</p>
+        <p>「今、何問目？」に関するお問い合わせは、以下のメールアドレスまでご連絡ください。</p>
         <p className="contact-email">
           <a href="mailto:amai6gy@gmail.com">amai6gy@gmail.com</a>
         </p>
