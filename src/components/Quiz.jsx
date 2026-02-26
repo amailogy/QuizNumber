@@ -274,7 +274,7 @@ export default function Quiz() {
               もう一度
             </button>
             <button className="btn btn-share" onClick={handleShare}>
-              シェア
+              結果をシェア
             </button>
           </div>
         </div>
