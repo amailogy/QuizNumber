@@ -17,7 +17,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">何問目クイズ</h1>
+        <h1 className="app-title">今、何問目？</h1>
       </header>
       <main>
         <Quiz />
@@ -30,7 +30,7 @@ function App() {
           <span className="footer-sep">|</span>
           <button onClick={() => setPage('contact')}>お問い合わせ</button>
         </nav>
-        <p>&copy; 2026 何問目クイズ</p>
+        <p>&copy; 2026 今、何問目？</p>
       </footer>
     </div>
   );
