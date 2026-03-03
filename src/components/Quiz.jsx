@@ -24,6 +24,43 @@ function saveScore(score) {
   return trimmed;
 }
 
+// ピクセルアート数字 (5行x3列)
+const DIGIT_PATTERNS = {
+  '0': [[1,1,1],[1,0,1],[1,0,1],[1,0,1],[1,1,1]],
+  '1': [[0,1,0],[1,1,0],[0,1,0],[0,1,0],[1,1,1]],
+  '2': [[1,1,1],[0,0,1],[1,1,1],[1,0,0],[1,1,1]],
+  '3': [[1,1,1],[0,0,1],[1,1,1],[0,0,1],[1,1,1]],
+  '4': [[1,0,1],[1,0,1],[1,1,1],[0,0,1],[0,0,1]],
+  '5': [[1,1,1],[1,0,0],[1,1,1],[0,0,1],[1,1,1]],
+  '6': [[1,1,1],[1,0,0],[1,1,1],[1,0,1],[1,1,1]],
+  '7': [[1,1,1],[0,0,1],[0,0,1],[0,0,1],[0,0,1]],
+  '8': [[1,1,1],[1,0,1],[1,1,1],[1,0,1],[1,1,1]],
+  '9': [[1,1,1],[1,0,1],[1,1,1],[0,0,1],[1,1,1]],
+};
+
+function getScoreEmoji(n) {
+  if (n >= 100) return ['⭐', '🫧'];
+  if (n >= 70)  return ['⚫', '🫧'];
+  if (n >= 50)  return ['🟣', '🫧'];
+  if (n >= 40)  return ['🔴', '🫧'];
+  if (n >= 30)  return ['🟠', '🫧'];
+  if (n >= 20)  return ['🟡', '🫧'];
+  if (n >= 10)  return ['🔵', '🫧'];
+  return ['🟢', '🫧'];
+}
+
+function numberToPixelArt(num) {
+  const digits = String(num).split('');
+  const [filled, empty] = getScoreEmoji(num);
+  const rows = [[], [], [], [], []];
+  digits.forEach((d, di) => {
+    if (di > 0) for (let r = 0; r < 5; r++) rows[r].push(0);
+    const pattern = DIGIT_PATTERNS[d];
+    for (let r = 0; r < 5; r++) rows[r].push(...pattern[r]);
+  });
+  return rows.map(row => row.map(v => v ? filled : empty).join('')).join('\n');
+}
+
 // SVG円形タイマーの設定
 const CIRCLE_RADIUS = 140;
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
@@ -164,14 +201,10 @@ export default function Quiz() {
   };
 
   const handleShare = () => {
-    const score = questionNumber - 1;
-    const text = `今、${score + 1}問目！\n挑戦者求ム👇\nhttps://nanmonme.com/`;
-    if (navigator.share) {
-      navigator.share({ text });
-    } else {
-      navigator.clipboard.writeText(text);
-      alert('結果をコピーしました！');
-    }
+    const num = questionNumber; // 問目 = score + 1
+    const text = `今、何問目？\n${numberToPixelArt(num)}\nnanmonme.com`;
+    const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
   };
 
   // タイマーの進行率 (0〜1)
@@ -274,7 +307,7 @@ export default function Quiz() {
               もう一度
             </button>
             <button className="btn btn-share" onClick={handleShare}>
-              結果をシェア
+              Xにシェア
             </button>
           </div>
         </div>
