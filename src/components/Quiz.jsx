@@ -58,7 +58,7 @@ function numberToPixelArt(num) {
     const pattern = DIGIT_PATTERNS[d];
     for (let r = 0; r < 5; r++) rows[r].push(...pattern[r]);
   });
-  return rows.map(row => row.map(v => v ? filled : empty).join('')).join('\n');
+  return rows.map(row => empty + row.map(v => v ? filled : empty).join('') + empty).join('\n');
 }
 
 // SVG円形タイマーの設定
