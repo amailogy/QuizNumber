@@ -204,7 +204,7 @@ export default function Quiz() {
     const num = questionNumber; // 問目 = score + 1
     const text = `今、何問目？\n${numberToPixelArt(num)}\nnanmonme.com`;
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    window.location.href = url;
   };
 
   // タイマーの進行率 (0〜1)
