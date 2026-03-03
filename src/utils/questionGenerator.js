@@ -76,7 +76,7 @@ export function generateQuestion(questionNumber, answerHistory) {
     }
 
     case 'past_answer': {
-      const maxBack = Math.min(maxN, answerHistory.length - 1);
+      const maxBack = Math.min(5, answerHistory.length - 1);
       const n = randInt(1, Math.max(1, maxBack));
       const pastIndex = answerHistory.length - n;
       const pastAnswer = answerHistory[pastIndex];
