@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { generateQuestion } from '../utils/questionGenerator';
+import { trackGameStart, trackGameOver, trackShare, trackRetry } from '../utils/analytics';
 
 const RESULT_DISPLAY_MS = 1000;
 const TIME_LIMIT = 10; // 秒
@@ -145,6 +146,7 @@ export default function Quiz() {
   // スタートボタン
   const handleStart = () => {
     setStarted(true);
+    trackGameStart();
     setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -162,8 +164,9 @@ export default function Quiz() {
   const handleTimeOut = useCallback(() => {
     stopTimer();
     setResult('timeout');
+    trackGameOver(questionNumber - 1, 'timeout');
     handleGameEnd();
-  }, [stopTimer, handleGameEnd]);
+  }, [stopTimer, handleGameEnd, questionNumber]);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
@@ -184,11 +187,13 @@ export default function Quiz() {
       }, RESULT_DISPLAY_MS);
     } else {
       setResult('wrong');
+      trackGameOver(questionNumber - 1, 'wrong');
       handleGameEnd();
     }
-  }, [question, userAnswer, result, stopTimer, handleGameEnd]);
+  }, [question, userAnswer, result, stopTimer, handleGameEnd, questionNumber]);
 
   const handleRetry = () => {
+    trackRetry();
     setQuestionNumber(1);
     setAnswerHistory([]);
     setUserAnswer('');
@@ -202,6 +207,7 @@ export default function Quiz() {
 
   const handleShare = () => {
     const num = questionNumber; // 問目 = score + 1
+    trackShare(questionNumber - 1);
     const text = `今、何問目？\n${numberToPixelArt(num)}\nnanmonme.com`;
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.location.href = url;
