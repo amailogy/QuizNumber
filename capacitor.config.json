@@ -1,0 +1,12 @@
+{
+  "appId": "com.amailogy.nanmonme",
+  "appName": "今、何問目？",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0f0f1a"
+  },
+  "server": {
+    "hostname": "nanmonme.com"
+  }
+}
