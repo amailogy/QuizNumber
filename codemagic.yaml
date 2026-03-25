@@ -49,6 +49,3 @@ workflows:
             </dict></plist>'
     artifacts:
       - ios/App/build/export/*.ipa
-    publishing:
-      app_store_connect:
-        auth: integration
