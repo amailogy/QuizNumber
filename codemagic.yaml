@@ -1,0 +1,54 @@
+workflows:
+  ios-release:
+    name: iOS Release
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.amailogy.nanmonme
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcodeproj"
+      node: 20
+      xcode: latest
+    scripts:
+      - name: Install Node dependencies
+        script: |
+          npm ci
+      - name: Build web app
+        script: |
+          npm run build
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+      - name: Build iOS app
+        script: |
+          cd ios/App
+          xcodebuild -project App.xcodeproj \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath build/App.xcarchive \
+            archive
+      - name: Export IPA
+        script: |
+          cd ios/App
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist /dev/stdin \
+            -exportPath build/export \
+            <<< '<?xml version="1.0" encoding="UTF-8"?>
+            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+            <plist version="1.0"><dict>
+              <key>method</key><string>app-store</string>
+              <key>uploadBitcode</key><false/>
+              <key>uploadSymbols</key><true/>
+            </dict></plist>'
+    artifacts:
+      - ios/App/build/export/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
