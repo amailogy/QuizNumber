@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { generateQuestion } from '../utils/questionGenerator';
 import { trackGameStart, trackGameOver, trackShare, trackRetry } from '../utils/analytics';
+import { showInterstitial } from '../utils/admob';
 
 const RESULT_DISPLAY_MS = 1000;
 const TIME_LIMIT = 10; // 秒
@@ -157,6 +158,7 @@ export default function Quiz() {
     const updated = saveScore(finalScore);
     setRanking(updated);
     setTimeout(() => {
+      showInterstitial();
       setGameOver(true);
     }, RESULT_DISPLAY_MS);
   }, [questionNumber]);
