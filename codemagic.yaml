@@ -11,6 +11,7 @@ workflows:
         bundle_identifier: com.amailogy.nanmonme
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcodeproj"
+        TEAM_ID: "9ZQY7HY294"
       node: 20
       xcode: latest
     scripts:
@@ -23,9 +24,16 @@ workflows:
       - name: Sync Capacitor
         script: |
           npx cap sync ios
-      - name: Set up code signing
+      - name: Update signing settings
         script: |
+          cd ios/App
           xcode-project use-profiles
+          xcodebuild -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE="Manual" \
+            -showBuildSettings | grep -E "DEVELOPMENT_TEAM|CODE_SIGN|PROVISIONING" || true
       - name: Build iOS app
         script: |
           cd ios/App
@@ -34,6 +42,7 @@ workflows:
             -sdk iphoneos \
             -configuration Release \
             -archivePath build/App.xcarchive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
             archive
       - name: Export IPA
         script: |
@@ -46,6 +55,7 @@ workflows:
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
             <plist version="1.0"><dict>
               <key>method</key><string>app-store</string>
+              <key>teamID</key><string>9ZQY7HY294</string>
               <key>uploadBitcode</key><false/>
               <key>uploadSymbols</key><true/>
             </dict></plist>'
