@@ -274,7 +274,23 @@ jobs:
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
             -allowProvisioningUpdates
 
+      - name: Upload to App Store Connect
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          IPA_PATH=$(ls ios/App/build/export/*.ipa)
+          echo "Uploading $IPA_PATH to App Store Connect..."
+          xcrun notarytool 2>/dev/null || true
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --show-progress
+
       - name: Upload IPA artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-ipa
