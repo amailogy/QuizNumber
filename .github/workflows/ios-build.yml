@@ -130,60 +130,52 @@ jobs:
             });
           }
 
-          async function main() {
-            // Read CSR
-            const csrContent = fs.readFileSync(path.join(require("os").homedir(), "cert.csr"), "utf8");
+          // Helper: create or replace a certificate of given type
+          async function ensureCert(certType, label) {
+            console.log(`\n--- ${label} ---`);
 
-            // Try to create a new certificate with our CSR
-            console.log("Creating new iOS Distribution certificate...");
-            let certContent;
-            try {
-              const createResp = await apiRequest("POST", "/v1/certificates", {
-                data: {
-                  type: "certificates",
-                  attributes: {
-                    certificateType: "IOS_DISTRIBUTION",
-                    csrContent: csrContent,
-                  },
-                },
-              });
-              certContent = createResp.data.attributes.certificateContent;
-              console.log("✅ New certificate created");
-            } catch (e) {
-              console.log("Create failed, checking existing certs...");
-              // If creation fails (e.g. limit reached), revoke oldest and retry
-              const listResp = await apiRequest("GET",
-                "/v1/certificates?filter[certificateType]=IOS_DISTRIBUTION&limit=200");
-              const existing = listResp.data || [];
-              console.log(`Found ${existing.length} existing cert(s)`);
+            // First, revoke ALL existing certs of this type (we don't have their private keys)
+            console.log(`Checking existing ${certType} certificates...`);
+            const listResp = await apiRequest("GET",
+              `/v1/certificates?filter[certificateType]=${certType}&limit=200`);
+            const existing = listResp.data || [];
+            console.log(`Found ${existing.length} existing ${certType} cert(s)`);
 
-              if (existing.length > 0) {
-                // Revoke oldest
-                const oldestId = existing[0].id;
-                console.log(`Revoking certificate ${oldestId}...`);
-                await apiRequest("DELETE", `/v1/certificates/${oldestId}`);
-                console.log("Revoked. Creating new certificate...");
-
-                const retryResp = await apiRequest("POST", "/v1/certificates", {
-                  data: {
-                    type: "certificates",
-                    attributes: {
-                      certificateType: "IOS_DISTRIBUTION",
-                      csrContent: csrContent,
-                    },
-                  },
-                });
-                certContent = retryResp.data.attributes.certificateContent;
-                console.log("✅ New certificate created after revoking old one");
-              } else {
-                throw new Error("No existing certificates and cannot create new one");
+            for (const cert of existing) {
+              console.log(`Revoking ${cert.id}...`);
+              try {
+                await apiRequest("DELETE", `/v1/certificates/${cert.id}`);
+              } catch (e) {
+                console.log(`Warning: could not revoke ${cert.id}: ${e.message}`);
               }
             }
 
-            // Save certificate as DER
-            const certDer = Buffer.from(certContent, "base64");
-            fs.writeFileSync(path.join(require("os").homedir(), "cert.cer"), certDer);
-            console.log("✅ Certificate saved");
+            // Create new certificate with our CSR
+            const csrContent = fs.readFileSync(
+              path.join(require("os").homedir(), "cert.csr"), "utf8");
+            console.log(`Creating new ${certType} certificate...`);
+            const createResp = await apiRequest("POST", "/v1/certificates", {
+              data: {
+                type: "certificates",
+                attributes: { certificateType: certType, csrContent },
+              },
+            });
+            const certContent = createResp.data.attributes.certificateContent;
+            console.log(`✅ ${label} created`);
+            return certContent;
+          }
+
+          async function main() {
+            // Create BOTH Development and Distribution certificates
+            // Xcode automatic signing needs Development cert for building
+            const devCert = await ensureCert("DEVELOPMENT", "Apple Development Certificate");
+            const distCert = await ensureCert("IOS_DISTRIBUTION", "iOS Distribution Certificate");
+
+            // Save both certificates - we'll import both into keychain
+            const home = require("os").homedir();
+            fs.writeFileSync(`${home}/cert_dev.cer`, Buffer.from(devCert, "base64"));
+            fs.writeFileSync(`${home}/cert_dist.cer`, Buffer.from(distCert, "base64"));
+            console.log("\n✅ Both certificates saved");
           }
 
           main().catch((err) => {
@@ -192,14 +184,23 @@ jobs:
           });
           NODEJS_EOF
 
-          # --- 5. Create PKCS12 and import into keychain ---
-          openssl x509 -inform DER -in ~/cert.cer -out ~/cert.pem
+          # --- 5. Create PKCS12 and import BOTH certs into keychain ---
           CERT_PASSWORD=$(openssl rand -hex 12)
-          openssl pkcs12 -export -out ~/cert.p12 \
-            -inkey ~/cert_key.pem -in ~/cert.pem \
-            -passout "pass:$CERT_PASSWORD"
 
-          security import ~/cert.p12 -k "$KEYCHAIN_PATH" \
+          # Import Development certificate
+          openssl x509 -inform DER -in ~/cert_dev.cer -out ~/cert_dev.pem
+          openssl pkcs12 -export -out ~/cert_dev.p12 \
+            -inkey ~/cert_key.pem -in ~/cert_dev.pem \
+            -passout "pass:$CERT_PASSWORD"
+          security import ~/cert_dev.p12 -k "$KEYCHAIN_PATH" \
+            -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+
+          # Import Distribution certificate
+          openssl x509 -inform DER -in ~/cert_dist.cer -out ~/cert_dist.pem
+          openssl pkcs12 -export -out ~/cert_dist.p12 \
+            -inkey ~/cert_key.pem -in ~/cert_dist.pem \
+            -passout "pass:$CERT_PASSWORD"
+          security import ~/cert_dist.p12 -k "$KEYCHAIN_PATH" \
             -P "$CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
 
           security set-key-partition-list -S apple-tool:,apple:,codesign: \
@@ -207,7 +208,7 @@ jobs:
 
           echo "Certificates in keychain:"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
-          echo "✅ Signing certificate installed successfully"
+          echo "✅ Both signing certificates installed successfully"
 
       - name: Build iOS app
         env:
@@ -276,4 +277,4 @@ jobs:
           if [ -n "${KEYCHAIN_PATH:-}" ]; then
             security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
           fi
-          rm -f ~/cert_key.pem ~/cert.csr ~/cert.cer ~/cert.pem ~/cert.p12 2>/dev/null || true
+          rm -f ~/cert_key.pem ~/cert.csr ~/cert_dev.* ~/cert_dist.* 2>/dev/null || true
