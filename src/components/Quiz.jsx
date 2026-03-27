@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { generateQuestion } from '../utils/questionGenerator';
 import { trackGameStart, trackGameOver, trackShare, trackRetry } from '../utils/analytics';
 import { showInterstitial } from '../utils/admob';
+import { signInGameCenter, submitScore, showLeaderboard, isNativeApp } from '../utils/gamecenter';
 
 const RESULT_DISPLAY_MS = 1000;
 const TIME_LIMIT = 10; // 秒
@@ -80,6 +81,11 @@ export default function Quiz() {
   const timerRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Game Center自動サインイン
+  useEffect(() => {
+    signInGameCenter();
+  }, []);
+
   // タイマー開始
   const startTimer = useCallback(() => {
     clearInterval(timerRef.current);
@@ -157,6 +163,8 @@ export default function Quiz() {
     const finalScore = questionNumber - 1;
     const updated = saveScore(finalScore);
     setRanking(updated);
+    // Game Centerにスコア送信
+    submitScore(finalScore);
     setTimeout(() => {
       showInterstitial();
       setGameOver(true);
@@ -317,6 +325,11 @@ export default function Quiz() {
             <button className="btn btn-share" onClick={handleShare}>
               Xにシェア
             </button>
+            {isNativeApp() && (
+              <button className="btn btn-leaderboard" onClick={showLeaderboard}>
+                🏆 ランキング
+              </button>
+            )}
           </div>
         </div>
       </div>

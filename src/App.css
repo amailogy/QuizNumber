@@ -293,6 +293,13 @@ main {
   background: rgba(108, 92, 231, 0.1);
 }
 
+.btn-leaderboard {
+  background: linear-gradient(135deg, #f9a825, #ff6f00);
+  border: none;
+  color: #fff;
+  width: 100%;
+}
+
 /* === Start Screen === */
 .start-screen {
   text-align: center;
