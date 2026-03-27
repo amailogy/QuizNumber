@@ -12,7 +12,7 @@ workflows:
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcodeproj"
         TEAM_ID: "9ZQY7HY294"
-      node: 20
+      node: 22
       xcode: latest
     scripts:
       - name: Install Node dependencies
