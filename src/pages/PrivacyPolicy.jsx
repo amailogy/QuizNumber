@@ -23,7 +23,7 @@ export default function PrivacyPolicy({ onBack }) {
         <h3>5. お問い合わせ</h3>
         <p>本ポリシーに関するお問い合わせは、お問い合わせページよりご連絡ください。</p>
 
-        <p className="page-date">制定日: 2026年2月26日</p>
+        <p className="page-date">制定日: 2026年3月29日</p>
       </div>
     </div>
   );
