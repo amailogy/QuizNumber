@@ -23,10 +23,9 @@ workflows:
           npx cap sync ios
       - name: Set up code signing
         script: |
-          cd ios/App
-          # Write API key to file for xcodebuild
           mkdir -p ~/private_keys
-          echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          printf '%s\n' "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
+          cat ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 | head -1
       - name: Build iOS app
         script: |
           cd ios/App
