@@ -10,7 +10,6 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.amailogy.nanmonme
       vars:
-        XCODE_WORKSPACE: "ios/App/App.xcodeproj"
         TEAM_ID: "9ZQY7HY294"
       node: 22
       xcode: latest
@@ -24,16 +23,10 @@ workflows:
       - name: Sync Capacitor
         script: |
           npx cap sync ios
-      - name: Update signing settings
+      - name: Set up code signing
         script: |
           cd ios/App
           xcode-project use-profiles
-          xcodebuild -project App.xcodeproj \
-            -scheme App \
-            -configuration Release \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_STYLE="Manual" \
-            -showBuildSettings | grep -E "DEVELOPMENT_TEAM|CODE_SIGN|PROVISIONING" || true
       - name: Build iOS app
         script: |
           cd ios/App
@@ -56,8 +49,13 @@ workflows:
             <plist version="1.0"><dict>
               <key>method</key><string>app-store</string>
               <key>teamID</key><string>9ZQY7HY294</string>
+              <key>signingStyle</key><string>automatic</string>
               <key>uploadBitcode</key><false/>
               <key>uploadSymbols</key><true/>
             </dict></plist>'
     artifacts:
       - ios/App/build/export/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
