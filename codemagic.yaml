@@ -27,12 +27,14 @@ workflows:
         script: |
           cd ios/App
           xcode-project use-profiles
-      - name: Increment build number
+      - name: Increment version and build number
         script: |
           BUILD_NUMBER=$(date +%Y%m%d%H%M)
           echo "Setting build number to $BUILD_NUMBER"
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.1" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" ios/App/App/Info.plist
       - name: Build iOS app
         script: |
           cd ios/App
