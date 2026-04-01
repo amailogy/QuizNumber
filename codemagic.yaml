@@ -30,7 +30,10 @@ workflows:
       - name: Increment build number
         script: |
           cd ios/App
-          agvtool new-version -all $(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_CONNECT_KEY_IDENTIFIER" | tail -1) + 1))
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_CONNECT_KEY_IDENTIFIER" 2>/dev/null | tail -1 || echo "0")
+          NEXT=$((LATEST + 1))
+          echo "Setting build number to $NEXT"
+          agvtool new-version -all $NEXT
       - name: Build iOS app
         script: |
           cd ios/App
