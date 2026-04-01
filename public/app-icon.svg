@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="strokeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a29bfe"/>
+      <stop offset="50%" style="stop-color:#6c5ce7"/>
+      <stop offset="100%" style="stop-color:#a29bfe"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#d0cbff"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bgGrad)"/>
+  <!-- Circle gauge track (subtle) -->
+  <circle cx="512" cy="512" r="300" fill="none" stroke="rgba(108,92,231,0.15)" stroke-width="24"/>
+  <!-- Circle gauge progress (full / purple) -->
+  <circle cx="512" cy="512" r="300" fill="none" stroke="url(#strokeGrad)" stroke-width="24" stroke-linecap="round"/>
+  <!-- Text inside circle -->
+  <text x="522" y="542" text-anchor="middle" font-family="'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif" font-weight="800" font-size="88" fill="url(#textGrad)">今、何問目？</text>
+</svg>

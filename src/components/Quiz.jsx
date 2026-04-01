@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { generateQuestion } from '../utils/questionGenerator';
 import { trackGameStart, trackGameOver, trackShare, trackRetry } from '../utils/analytics';
 import { showInterstitial } from '../utils/admob';
@@ -78,6 +78,7 @@ export default function Quiz() {
   const [result, setResult] = useState(null); // 'correct' | 'wrong' | 'timeout' | null
   const [ranking, setRanking] = useState(() => loadRanking());
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+  const [copied, setCopied] = useState(false);
   const timerRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -131,13 +132,14 @@ export default function Quiz() {
   }, [questionNumber, gameOver, result, started]);
 
   // フォーカスを強制的に維持（キーボードが消えないように）
+  // ただし回答済み（result中）はキーボードを閉じる
   const handleBlur = useCallback(() => {
-    if (started && !gameOver) {
+    if (started && !gameOver && !result) {
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
     }
-  }, [started, gameOver]);
+  }, [started, gameOver, result]);
 
   // iOSでスクロールさせない
   useEffect(() => {
@@ -186,6 +188,7 @@ export default function Quiz() {
     if (isNaN(parsed)) return;
 
     stopTimer();
+    inputRef.current?.blur();
 
     if (parsed === question.answer) {
       setResult('correct');
@@ -218,9 +221,28 @@ export default function Quiz() {
   const handleShare = () => {
     const num = questionNumber; // 問目 = score + 1
     trackShare(questionNumber - 1);
-    const text = `今、何問目？\n${numberToPixelArt(num)}\nnanmonme.com`;
+    const text = `今、何問目？\n${numberToPixelArt(num)}`;
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.location.href = url;
+  };
+
+  const handleShareApp = async () => {
+    const shareData = {
+      title: '今、何問目？',
+      text: '「今、何問目？」- 問題の番号を数えるだけなのに、だんだん分からなくなる…！',
+      url: 'https://apps.apple.com/jp/app/%E4%BB%8A-%E4%BD%95%E5%95%8F%E7%9B%AE/id6761272923',
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // ユーザーがキャンセルした場合など
+      }
+    } else {
+      await navigator.clipboard.writeText('https://apps.apple.com/jp/app/%E4%BB%8A-%E4%BD%95%E5%95%8F%E7%9B%AE/id6761272923');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   // タイマーの進行率 (0〜1)
@@ -257,6 +279,11 @@ export default function Quiz() {
                 );
               })}
             </ol>
+            {isNativeApp() && (
+              <button className="btn btn-leaderboard btn-leaderboard-start" onClick={showLeaderboard}>
+                🏆 Game Center ランキング
+              </button>
+            )}
           </div>
           <div className="start-circle">
             <svg viewBox="0 0 320 320" className="timer-svg">
@@ -277,6 +304,9 @@ export default function Quiz() {
           </div>
           <button className="btn btn-primary btn-start" onClick={handleStart}>
             START
+          </button>
+          <button className="btn btn-share-app" onClick={handleShareApp}>
+            {copied ? '✅ コピーしました' : '📤 このアプリを共有'}
           </button>
         </div>
       </div>
