@@ -44,22 +44,33 @@ workflows:
       - name: Export IPA
         script: |
           cd ios/App
+          cat > exportOptions.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>teamID</key>
+            <string>9ZQY7HY294</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.amailogy.nanmonme</key>
+              <string>nanmonme Codemagic</string>
+            </dict>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
           xcodebuild -exportArchive \
             -archivePath build/App.xcarchive \
-            -exportOptionsPlist build/App.xcarchive/Info.plist \
-            -exportPath build/export \
-            || xcodebuild -exportArchive \
-              -archivePath build/App.xcarchive \
-              -exportOptionsPlist /dev/stdin \
-              -exportPath build/export \
-              <<< '<?xml version="1.0" encoding="UTF-8"?>
-              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-              <plist version="1.0"><dict>
-                <key>method</key><string>app-store-connect</string>
-                <key>teamID</key><string>9ZQY7HY294</string>
-                <key>uploadBitcode</key><false/>
-                <key>uploadSymbols</key><true/>
-              </dict></plist>'
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/export
     artifacts:
       - ios/App/build/export/*.ipa
     publishing:
