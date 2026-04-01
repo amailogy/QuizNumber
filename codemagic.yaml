@@ -29,10 +29,10 @@ workflows:
           xcode-project use-profiles
       - name: Increment build number
         script: |
-          cd ios/App
           BUILD_NUMBER=$(date +%Y%m%d%H%M)
           echo "Setting build number to $BUILD_NUMBER"
-          agvtool new-version -all $BUILD_NUMBER
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" ios/App/App/Info.plist
       - name: Build iOS app
         script: |
           cd ios/App
