@@ -6,11 +6,9 @@ workflows:
     integrations:
       app_store_connect: Personal
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.amailogy.nanmonme
       vars:
         TEAM_ID: "9ZQY7HY294"
+        BUNDLE_ID: "com.amailogy.nanmonme"
       node: 22
       xcode: latest
     scripts:
@@ -25,34 +23,53 @@ workflows:
           npx cap sync ios
       - name: Set up code signing
         script: |
+          # Use App Store Connect API key for automatic signing
           cd ios/App
-          xcode-project use-profiles
+          # Enable automatic signing in the project
+          sed -i '' 's/CODE_SIGN_STYLE = Manual/CODE_SIGN_STYLE = Automatic/g' App.xcodeproj/project.pbxproj
+          sed -i '' 's/DEVELOPMENT_TEAM = ""/DEVELOPMENT_TEAM = "'$TEAM_ID'"/g' App.xcodeproj/project.pbxproj
       - name: Build iOS app
         script: |
           cd ios/App
+          # Find API key for xcodebuild
+          API_KEY_PATH=$(find ~/Library/Developer -name "AuthKey_*.p8" -o -name "*.p8" 2>/dev/null | head -1)
+          ISSUER_ID=$(cat $CM_KEYCHAIN_PATH/../issuer_id 2>/dev/null || echo "")
+
           xcodebuild -project App.xcodeproj \
             -scheme App \
             -sdk iphoneos \
             -configuration Release \
             -archivePath build/App.xcarchive \
             DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGN_STYLE="Automatic" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/Library/Developer/Xcode/AuthKey_$APP_STORE_CONNECT_KEY_IDENTIFIER.p8 \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
             archive
       - name: Export IPA
         script: |
           cd ios/App
+          cat > exportOptions.plist << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadBitcode</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
+
           xcodebuild -exportArchive \
             -archivePath build/App.xcarchive \
-            -exportOptionsPlist /dev/stdin \
+            -exportOptionsPlist exportOptions.plist \
             -exportPath build/export \
-            <<< '<?xml version="1.0" encoding="UTF-8"?>
-            <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-            <plist version="1.0"><dict>
-              <key>method</key><string>app-store</string>
-              <key>teamID</key><string>9ZQY7HY294</string>
-              <key>signingStyle</key><string>automatic</string>
-              <key>uploadBitcode</key><false/>
-              <key>uploadSymbols</key><true/>
-            </dict></plist>'
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/Library/Developer/Xcode/AuthKey_$APP_STORE_CONNECT_KEY_IDENTIFIER.p8 \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
       - ios/App/build/export/*.ipa
     publishing:
