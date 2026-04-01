@@ -23,18 +23,13 @@ workflows:
           npx cap sync ios
       - name: Set up code signing
         script: |
-          # Use App Store Connect API key for automatic signing
           cd ios/App
-          # Enable automatic signing in the project
-          sed -i '' 's/CODE_SIGN_STYLE = Manual/CODE_SIGN_STYLE = Automatic/g' App.xcodeproj/project.pbxproj
-          sed -i '' 's/DEVELOPMENT_TEAM = ""/DEVELOPMENT_TEAM = "'$TEAM_ID'"/g' App.xcodeproj/project.pbxproj
+          # Write API key to file for xcodebuild
+          mkdir -p ~/private_keys
+          echo -n "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8
       - name: Build iOS app
         script: |
           cd ios/App
-          # Find API key for xcodebuild
-          API_KEY_PATH=$(find ~/Library/Developer -name "AuthKey_*.p8" -o -name "*.p8" 2>/dev/null | head -1)
-          ISSUER_ID=$(cat $CM_KEYCHAIN_PATH/../issuer_id 2>/dev/null || echo "")
-
           xcodebuild -project App.xcodeproj \
             -scheme App \
             -sdk iphoneos \
@@ -43,7 +38,7 @@ workflows:
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGN_STYLE="Automatic" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath ~/Library/Developer/Xcode/AuthKey_$APP_STORE_CONNECT_KEY_IDENTIFIER.p8 \
+            -authenticationKeyPath ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
             -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
             archive
@@ -67,7 +62,7 @@ workflows:
             -exportOptionsPlist exportOptions.plist \
             -exportPath build/export \
             -allowProvisioningUpdates \
-            -authenticationKeyPath ~/Library/Developer/Xcode/AuthKey_$APP_STORE_CONNECT_KEY_IDENTIFIER.p8 \
+            -authenticationKeyPath ~/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_IDENTIFIER}.p8 \
             -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
