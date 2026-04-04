@@ -46,7 +46,7 @@ public class GameCenterPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("Missing score parameter")
             return
         }
-        let leaderboardID = call.getString("leaderboardID") ?? "nanmonme_highscore"
+        let leaderboardID = call.getString("leaderboardID") ?? "nanmonme.highscore"
 
         guard isAuthenticated else {
             call.resolve(["success": false, "error": "Not authenticated"])

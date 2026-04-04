@@ -1,6 +1,6 @@
 // Game Center integration via custom Capacitor plugin
 
-const LEADERBOARD_ID = 'nanmonme_highscore';
+const LEADERBOARD_ID = 'nanmonme.highscore';
 
 function getPlugin() {
   if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins) {
